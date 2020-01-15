@@ -73,3 +73,36 @@ var picturesHTMLGenerate = function (picsArray) {
 };
 
 picturesSection.appendChild(picturesHTMLGenerate(pics));
+
+var classToggle = function (className, object) {
+  if (object.classList.contains(className)) {
+    object.classList.remove(className);
+  } else {
+    object.classList.add(className);
+  }
+};
+
+var bigPicture = document.querySelector('.big-picture');
+
+classToggle('hidden', bigPicture);
+
+bigPicture.querySelector('img').src = pics[0].url;
+bigPicture.querySelector('.likes-count').textContent = pics[0].likes;
+bigPicture.querySelector('.comments-count').textContent = pics[0].comments.length;
+bigPicture.querySelector('.social__caption').textContent = pics[0].description;
+
+var commentsList = bigPicture.querySelector('.social__comments');
+
+var avatarPics = commentsList.querySelectorAll('.social__picture');
+var avatarText = commentsList.querySelectorAll('.social__text');
+
+for (i = 0; i < pics[0].comments.length; i++) {
+  avatarPics[i].src = 'img/avatar-' + random(1, 6) + '.svg';
+  avatarText[i].textContent = pics[0].comments[i];
+}
+
+var socialCommentsCount = bigPicture.querySelector('.social__comment-count');
+var socialLoadMore = bigPicture.querySelector('.social__comments-loader');
+
+classToggle('visually-hidden', socialCommentsCount);
+classToggle('visually-hidden', socialLoadMore);
