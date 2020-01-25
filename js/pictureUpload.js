@@ -1,4 +1,5 @@
 'use strict';
+var MAX_TAG_COUNT = 5;
 
 var imgUploadOverlay = document.querySelector('.img-upload__overlay');
 var fileSelect = document.querySelector('#upload-file');
@@ -24,7 +25,7 @@ uploadSubmit.addEventListener('click', function (evt) {
 });
 
 
-function removeSpaces(string) {
+/* function removeSpaces(string) {
   string = string.replace(/\s+/g, ' ');
   if (string.startsWith(' ') || string.endsWith(' ')) {
     var array = string.split('');
@@ -38,56 +39,61 @@ function removeSpaces(string) {
     string = array.join('');
   }
   return string;
-}
+} */
 
 function removeSpacesNew(string) {
-  var rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g
+  var rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
   string = string.replace(/\s+/g, ' ');
-  string = string.replace(rtrim, '');
-
-  return string;
+  return string.replace(rtrim, '');
 }
 
 function startSymbol(symbol, words) {
   for (var i = 0; i < words.length; i++) {
     if (!words[i].startsWith(symbol)) {
-      return false;
+      return true;
     }
   }
-  return true;
+  return false;
 }
 
 function secondEntrySymbol(symbol, words) {
   for (var i = 0; i < words.length; i++) {
-    if (words.includes(symbol, 1)) {
-      return false;
+    if (words[i].includes(symbol, 1)) {
+      return true;
     }
   }
-  return true;
+  return false;
 }
 
-function wordLength(length, words) {
+function wordLength(minLength, maxLength, words) {
   for (var i = 0; i < words.length; i++) {
-    if (words[i] > length) {
-      return false;
+    if (words[i].length < minLength || words[i].length > maxLength) {
+      return true;
     }
   }
-  return true;
+  return false;
 }
 
 function wordDuplicate(words) {
   // eslint-disable-next-line no-undef
   var wordsSet = new Set(words);
-  return wordsSet.size === words.length;
+  return wordsSet.size !== words.length;
 }
 
 function setCustomValidity() {
   var hashTags = removeSpacesNew(hashTagsInput.value.toLowerCase()).split(' ');
-  startSymbol('#', hashTags);
-  secondEntrySymbol('#', hashTags);
-  wordLength(20, hashTags);
-  wordDuplicate(hashTags);
-  console.log(hashTags);
+  hashTagsInput.setCustomValidity('');
+  if (hashTags.length > MAX_TAG_COUNT) {
+    hashTagsInput.setCustomValidity('Максимальное количество хештегов ' + MAX_TAG_COUNT);
+  } else if (startSymbol('#', hashTags)) {
+    hashTagsInput.setCustomValidity('Все хештеги должны начинаться с #');
+  } else if (secondEntrySymbol('#', hashTags)) {
+    hashTagsInput.setCustomValidity('Все хештеги должны разделяться пробелом');
+  } else if (wordLength(2, 20, hashTags)) {
+    hashTagsInput.setCustomValidity('Длина тега может составлять 1 - 19 символов');
+  } else if (wordDuplicate(hashTags)) {
+    hashTagsInput.setCustomValidity('Теги не должны повторяться');
+  }
 }
 
 
@@ -104,7 +110,7 @@ var effectLevelPin = imgUploadOverlay.querySelector('.effect-level__pin');
 
 originalImg.addEventListener('click', function () {
   previewImg.style.filter = '';
-  console.log(effectLevelValue);
+  console.log(effectLevelValue, effectLevelPin);
 });
 
 chromeImg.addEventListener('click', function () {
