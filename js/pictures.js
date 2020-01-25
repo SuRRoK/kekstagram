@@ -44,7 +44,7 @@ var picGenerate = function (el) {
     url: 'photos/' + el + '.jpg',
     likes: random(15, 200),
     comments: commentsGenerate(COMMENTS_COUNT),
-    description: randomItem(DESCRIPTION_SAMPLE)
+    description: randomItem(DESCRIPTION_SAMPLE),
   };
 };
 
@@ -55,19 +55,21 @@ for (var i = 0; i < PIC_COUNT; i++) {
 var pictureTemplate = document.querySelector('#picture').content.querySelector('.picture');
 var picturesSection = document.querySelector('.pictures');
 
-var pictureHTMLGenerate = function (el, template) {
+var pictureHTMLGenerate = function (el, template, picNum) {
   var pictureHTML = template.cloneNode(true);
   pictureHTML.querySelector('.picture__img').src = el.url;
+  pictureHTML.querySelector('.picture__img').dataset.picNum = picNum;
   pictureHTML.querySelector('.picture__img').alt = el.description;
   pictureHTML.querySelector('.picture__likes').textContent = el.likes;
   pictureHTML.querySelector('.picture__comments').textContent = el.comments.length;
+
   return pictureHTML;
 };
 
 var picturesHTMLGenerate = function (picsArray) {
   var picturesHTML = document.createDocumentFragment();
   for (i = 0; i < pics.length; i++) {
-    picturesHTML.appendChild(pictureHTMLGenerate(picsArray[i], pictureTemplate));
+    picturesHTML.appendChild(pictureHTMLGenerate(picsArray[i], pictureTemplate, i));
   }
   return picturesHTML;
 };
@@ -84,25 +86,41 @@ var classToggle = function (className, object) {
 
 var bigPicture = document.querySelector('.big-picture');
 
-classToggle('hidden', bigPicture);
+var bigPictureGenerate = function (picNum) {
+  classToggle('hidden', bigPicture);
+  bigPicture.querySelector('img').src = pics[picNum].url;
+  bigPicture.querySelector('.likes-count').textContent = pics[picNum].likes;
+  bigPicture.querySelector('.comments-count').textContent = pics[picNum].comments.length;
+  bigPicture.querySelector('.social__caption').textContent = pics[picNum].description;
+  commentsBlockGenerator(picNum);
+};
 
-bigPicture.querySelector('img').src = pics[0].url;
-bigPicture.querySelector('.likes-count').textContent = pics[0].likes;
-bigPicture.querySelector('.comments-count').textContent = pics[0].comments.length;
-bigPicture.querySelector('.social__caption').textContent = pics[0].description;
+var commentsBlockGenerator = function (picNum) {
+  var commentsList = bigPicture.querySelector('.social__comments');
 
-var commentsList = bigPicture.querySelector('.social__comments');
+  var avatarPics = commentsList.querySelectorAll('.social__picture');
+  var avatarText = commentsList.querySelectorAll('.social__text');
 
-var avatarPics = commentsList.querySelectorAll('.social__picture');
-var avatarText = commentsList.querySelectorAll('.social__text');
+  for (i = 0; i < pics[picNum].comments.length; i++) {
+    avatarPics[i].src = 'img/avatar-' + random(1, 6) + '.svg';
+    avatarText[i].textContent = pics[picNum].comments[i];
+  }
 
-for (i = 0; i < pics[0].comments.length; i++) {
-  avatarPics[i].src = 'img/avatar-' + random(1, 6) + '.svg';
-  avatarText[i].textContent = pics[0].comments[i];
-}
+  var socialCommentsCount = bigPicture.querySelector('.social__comment-count');
+  var socialLoadMore = bigPicture.querySelector('.social__comments-loader');
 
-var socialCommentsCount = bigPicture.querySelector('.social__comment-count');
-var socialLoadMore = bigPicture.querySelector('.social__comments-loader');
+  classToggle('visually-hidden', socialCommentsCount);
+  classToggle('visually-hidden', socialLoadMore);
+};
 
-classToggle('visually-hidden', socialCommentsCount);
-classToggle('visually-hidden', socialLoadMore);
+var closeButton = document.querySelector('.big-picture__cancel');
+closeButton.addEventListener('click', function () {
+  classToggle('hidden', bigPicture);
+});
+
+picturesSection.addEventListener('click', function (evt) {
+  var target = evt.target;
+  if (target.tagName === 'IMG' && target.classList.contains('picture__img')) {
+    bigPictureGenerate(parseInt(target.dataset.picNum, 10));
+  }
+});
