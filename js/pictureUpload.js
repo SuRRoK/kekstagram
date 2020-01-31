@@ -24,23 +24,6 @@ uploadSubmit.addEventListener('click', function (evt) {
   setCustomValidity();
 });
 
-
-/* function removeSpaces(string) {
-  string = string.replace(/\s+/g, ' ');
-  if (string.startsWith(' ') || string.endsWith(' ')) {
-    var array = string.split('');
-    if (array[0] === ' ') {
-      array.splice(0, 1);
-    }
-    var lastElem = array.length - 1;
-    if (array[lastElem] === ' ') {
-      array.splice(lastElem, 1);
-    }
-    string = array.join('');
-  }
-  return string;
-} */
-
 function removeSpacesNew(string) {
   var rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
   string = string.replace(/\s+/g, ' ');
@@ -105,12 +88,9 @@ var marvinImg = imgUploadOverlay.querySelector('.effects__preview--marvin');
 var phobosImg = imgUploadOverlay.querySelector('.effects__preview--phobos');
 var heatImg = imgUploadOverlay.querySelector('.effects__preview--heat');
 
-var effectLevelValue = imgUploadOverlay.querySelector('.effect-level__value');
 var effectLevelLine = imgUploadOverlay.querySelector('.effect-level__line');
 var effectLevelPin = imgUploadOverlay.querySelector('.effect-level__pin');
 var effectLevelDepth = imgUploadOverlay.querySelector('.effect-level__depth');
-
-
 
 var filterSelect = function (effect, effectDeep) {
   switch (effect) {
@@ -150,7 +130,6 @@ effectLevelPin.addEventListener('mousedown', function (evt) {
   evt.preventDefault();
   var startX = evt.clientX;
   var effectLevelLineWidth = effectLevelLine.getBoundingClientRect().width;
-  console.log(effectLevelLineWidth);
   var onMouseMove = function (moveEvt) {
     moveEvt.preventDefault();
     var shiftX = startX - moveEvt.clientX;
@@ -173,12 +152,6 @@ effectLevelPin.addEventListener('mousedown', function (evt) {
   document.addEventListener('mousemove', onMouseMove);
   document.addEventListener('mouseup', onMouseUp);
 });
-
-// var clearEffects = function() {
-//   previewImg.className = '';
-//   previewImg.removeAttribute('data-effect');
-//   previewImg.removeAttribute('style');
-// };
 
 originalImg.addEventListener('click', function () {
   previewImg.removeAttribute('style');
