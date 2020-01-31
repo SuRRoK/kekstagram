@@ -24,23 +24,6 @@ uploadSubmit.addEventListener('click', function (evt) {
   setCustomValidity();
 });
 
-
-/* function removeSpaces(string) {
-  string = string.replace(/\s+/g, ' ');
-  if (string.startsWith(' ') || string.endsWith(' ')) {
-    var array = string.split('');
-    if (array[0] === ' ') {
-      array.splice(0, 1);
-    }
-    var lastElem = array.length - 1;
-    if (array[lastElem] === ' ') {
-      array.splice(lastElem, 1);
-    }
-    string = array.join('');
-  }
-  return string;
-} */
-
 function removeSpacesNew(string) {
   var rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
   string = string.replace(/\s+/g, ' ');
@@ -105,7 +88,6 @@ var marvinImg = imgUploadOverlay.querySelector('.effects__preview--marvin');
 var phobosImg = imgUploadOverlay.querySelector('.effects__preview--phobos');
 var heatImg = imgUploadOverlay.querySelector('.effects__preview--heat');
 
-var effectLevelValue = imgUploadOverlay.querySelector('.effect-level__value');
 var effectLevelLine = imgUploadOverlay.querySelector('.effect-level__line');
 var effectLevelPin = imgUploadOverlay.querySelector('.effect-level__pin');
 var effectLevelDepth = imgUploadOverlay.querySelector('.effect-level__depth');
@@ -119,40 +101,61 @@ var filterSelect = function (effect, effectDeep) {
     case 'marvin':
       return 'invert(' + effectDeep + '%)';
     case 'phobos':
-      effectDeep = effectDeep / 100 * 5
+      effectDeep = effectDeep / 100 * 5;
       return 'blur(' + effectDeep + 'px)';
     case 'heat':
-      effectDeep = effectDeep / 100 * 3
+      effectDeep = effectDeep / 100 * 3;
       return 'brightness(' + effectDeep + ')';
     default:
       return '';
   }
 };
 
-effectLevelLine.addEventListener('click', function (evt) {
+var filterSetup = function (effDepth) {
+  var currentEffect = previewImg.dataset.effect;
+  previewImg.style.filter = filterSelect(currentEffect, effDepth);
+};
+
+effectLevelLine.addEventListener('mousedown', function (evt) {
   var clickX = evt.clientX;
   var effectLevelLineLeftPosition = effectLevelLine.getBoundingClientRect().left;
   var newPosition = (clickX - effectLevelLineLeftPosition);
   effectLevelPin.style.left = newPosition + 'px';
   effectLevelDepth.style.width = newPosition + 'px';
   var effDepth = Math.round(effectLevelDepth.getBoundingClientRect().width / effectLevelLine.getBoundingClientRect().width * 100);
-  var currentEffect = previewImg.dataset.effect;
-
-  previewImg.style.filter = filterSelect(currentEffect, effDepth);
-
+  filterSetup(effDepth);
 });
 
-// var clearEffects = function() {
-//   previewImg.className = '';
-//   previewImg.removeAttribute('data-effect');
-//   previewImg.removeAttribute('style');
-// };
+effectLevelPin.addEventListener('mousedown', function (evt) {
+  evt.preventDefault();
+  var startX = evt.clientX;
+  var effectLevelLineWidth = effectLevelLine.getBoundingClientRect().width;
+  var onMouseMove = function (moveEvt) {
+    moveEvt.preventDefault();
+    var shiftX = startX - moveEvt.clientX;
+    var newPosition = Math.round((effectLevelPin.offsetLeft - shiftX) / (effectLevelLineWidth) * 100);
+    if (newPosition < 0) {
+      newPosition = 0;
+    } else if (newPosition > 100) {
+      newPosition = 100;
+    }
+    startX = moveEvt.clientX;
+    effectLevelPin.style.left = newPosition + '%';
+    effectLevelDepth.style.width = newPosition + '%';
+    filterSetup(newPosition);
+  };
+  var onMouseUp = function (moveUp) {
+    moveUp.preventDefault();
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  };
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+});
 
 originalImg.addEventListener('click', function () {
   previewImg.removeAttribute('style');
   previewImg.removeAttribute('data-effect');
-  console.log('line left' + effectLevelLine.getBoundingClientRect().left);
-  console.log('pin left' + effectLevelPin.getBoundingClientRect().left);
 });
 
 var allAttributesMax = function () {
